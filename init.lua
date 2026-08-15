@@ -58,3 +58,5 @@ if vim.loop.fs_stat(colors_generated) then
 else
 	vim.cmd.colorscheme("tokyonight-night")
 end
+vim.g.user = "gafamy"
+vim.g.mail = "gaetan.famy@leaner.42.tech"
