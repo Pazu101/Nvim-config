@@ -5,10 +5,12 @@ return {
 		opts = {
 			enabled = true,
 			message_template = "<author> • <date> • <summary>",
+            display_virtual_text = false, -- disable floating text
 		},
 		config = function(_, opts)
 			vim.g.gitblame_enabled = opts.enabled
 			vim.g.gitblame_message_template = opts.message_template
+            vim.g.gitblame_display_virtual_text = opts.display_virtual_text
 		end,
 	},
 
