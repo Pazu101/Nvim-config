@@ -1,6 +1,6 @@
 return {
 	{
-		"f-person/git-blame.nvim",
+		"Pazu101/git-blame.nvim",
 		event = "VeryLazy",
 		opts = {
 			enabled = true,
