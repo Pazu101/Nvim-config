@@ -60,3 +60,19 @@ else
 end
 vim.g.user = "gafamy"
 vim.g.mail = "gaetan.famy@leaner.42.tech"
+vim.api.nvim_create_autocmd("BufNewFile",
+    {
+        pattern = "*.h",
+        callback = function()
+            local guard = vim.fn.expand("%:t"):upper():gsub("[^%w]", "_")
+            local lines = {
+                "#ifndef " .. guard,
+                "#define " .. guard,
+                "",
+                "",
+                "#endif // " .. guard,
+            }
+            vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+            vim.api.nvim_win_set_cursor(0, { 4, 1 })
+        end,
+    })
