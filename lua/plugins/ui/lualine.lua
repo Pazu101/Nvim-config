@@ -37,7 +37,40 @@ return {
 				return "│ " .. (icon and (icon .. " ") or "") .. str
 			end
 		end
-
+        -- directory the current file lives in, relative to cwd, filename stripped
+        local function relative_dir()
+            local dir = vim.fn.expand("%:p:h")
+            if dir == "" then
+                return ""
+            end
+            local parts = {}
+            for part in dir:gmatch("[^/]+") do
+                parts[#parts+1] = part
+            end
+            local n = #parts
+            if n == 0 then
+                return ""
+            elseif n == 1 then
+                return parts[1] .. "/"
+            end
+            return parts[n-1] .. "/" .. parts[n]
+        end
+        -- shrinks blame text so it doesn't run into line:col on the right. this is
+        -- a heuristic, not pixel-perfect: "reserved" is a rough guess at how much
+        -- room branch/diff/location/padding eat elsewhere on the line. tune it if
+        -- blame still crowds things on your terminal width, or if it's shrinking
+        -- more eagerly than it needs to
+        local function fit_blame_text(text)
+            if not text or text == "" then
+                return ""
+            end
+            local reserved = 45 + vim.fn.strdisplaywidth(relative_dir())
+            local max_len = math.max(20, vim.o.columns - reserved)
+            if vim.fn.strdisplaywidth(text) > max_len then
+                return vim.fn.strcharpart(text, 0, max_len - 1) .. "…"
+            end
+            return text
+        end
 		local mode_colors = {
 			normal = c.blue,
 			insert = c.green,
@@ -60,12 +93,13 @@ return {
 		-- of the six mode colors above (so nothing here is ever mistaken for a mode change)
 		local accents = {
 			branch = c.orange,
-			lsp = c.cyan,
-			encoding = c.magenta2,
+			-- lsp = c.cyan,
+			-- encoding = c.magenta2,
 			location = c.purple,
+            blame = c.dark3,
 			-- c.fg (pale lavender) was too close to the muted default to read as "colored" --
 			-- needs an actual saturated hue like the others
-			filename = c.blue1,
+			-- filename = c.blue1,
 		}
 
 		-- location (z) is a fixed accent rather than mode-colored; lualine reuses section z's
@@ -135,91 +169,53 @@ return {
 				always_divide_middle = true,
 				icons_enabled = true,
 			},
-			sections = {
-				lualine_a = {
-					{
-						"mode",
-						-- "NORMAL" takes up half the statusline, "N" doesn't. first item on the line,
-						-- so no leading divider here -- just the nvim logo as a fixed anchor.
-						fmt = function(str)
-							return " " .. str:sub(1, 1)
-						end,
-					},
-				},
-				lualine_b = {
-					{
-						"branch",
-						-- icon = "" (not omitted) on purpose: the component falls back to its own
-						-- default git-branch glyph whenever `icon` is unset, and that default gets
-						-- prepended after fmt runs, landing before the divider instead of after it.
-						-- suppressing it here and building the icon manually via divider_fmt keeps
-						-- ordering consistent with everything else.
-						icon = "",
-						fmt = divider_fmt(""),
-						color = { fg = accents.branch, gui = "bold" },
-					},
-					{ "diff", fmt = divider_fmt() },
-				},
-				lualine_c = {
-					{
-						"diagnostics",
-						cond = has_diagnostics,
-						color = diagnostics_color,
-						fmt = divider_fmt(),
-						symbols = {
-							error = " ",
-							warn = " ",
-							info = " ",
-							hint = " ",
-						},
-					},
-					{
-						"filename",
-						path = 1,
-						-- per-file language icon and color instead of one fixed accent -- e.g. a
-						-- Lua file renders in Lua's own blue, Python in Python's, etc. more
-						-- interesting than a single static hue, and it's already fetching the icon
-						-- from devicons here anyway, so the color comes along for free.
-						fmt = function(str)
-							if str == "" then
-								return ""
-							end
-							local ok, devicons = pcall(require, "nvim-web-devicons")
-							local icon = ok
-								and devicons.get_icon(vim.fn.expand("%:t"), vim.fn.expand("%:e"), { default = true })
-							return "│ " .. (icon and (icon .. " ") or "") .. str
-						end,
-						color = function()
-							local ok, devicons = pcall(require, "nvim-web-devicons")
-							if ok then
-								local _, color = devicons.get_icon_color(
-									vim.fn.expand("%:t"),
-									vim.fn.expand("%:e"),
-									{ default = true }
-								)
-								if color then
-									return { fg = color, gui = "bold" }
-								end
-							end
-							return { fg = accents.filename, gui = "bold" }
-						end,
-						symbols = { modified = " ", readonly = " " },
-					},
-				},
-				lualine_x = {
-					{ "lsp_status", fmt = divider_fmt(), color = { fg = accents.lsp, gui = "bold" } },
-					{ "searchcount", fmt = divider_fmt() },
-					{ "selectioncount", fmt = divider_fmt() },
-				},
-				lualine_y = { { "encoding", fmt = divider_fmt(""), color = { fg = accents.encoding } } },
-				lualine_z = { { "location", fmt = divider_fmt("") } },
-			},
+
+            sections = {
+                lualine_a = {},
+                lualine_b = {},
+                lualine_c = {
+                    {
+                        "diagnostics",
+                        cond = has_diagnostics,
+                        color = diagnostics_color,
+                        symbols = {
+                            error = " ",
+                            warn = " ",
+                            info = " ",
+                            hint = " ",
+                        },
+                    },
+                    { relative_dir, color = { fg = c.fg_dark } },
+                    {
+                        function()
+                            local ok, gitblame = pcall(require, "gitblame")
+                            if not ok then
+                                return ""
+                            end
+                            return fit_blame_text(gitblame.get_current_blame_text())
+                        end,
+                        cond = function()
+                            local ok, gitblame = pcall(require, "gitblame")
+                            return ok and gitblame.is_blame_text_available()
+                        end,
+                        fmt = divider_fmt(""),
+                        color = { fg = accents.blame },
+                    },
+                    { "branch", color = { fg = accents.branch, gui = "bold" } },
+                    { "diff" },
+                },
+                lualine_x = {
+                    { "searchcount", fmt = divider_fmt() },
+                    { "selectioncount", fmt = divider_fmt() },
+                },
+                lualine_y = {},
+                lualine_z = { { "location" } },
+            },
 			tabline = {
 				-- dropped use_mode_colors (that's what painted the colored buffer/tab pills) to
 				-- match the statusline's flat-text look; active vs inactive still reads via
 				-- lualine's own a/inactive-a theme contrast (bold+bright vs dim), just no fill
 				lualine_a = { { "buffers", symbols = { alternate_file = "" } } },
-				lualine_z = { { "tabs" } },
 			},
 			extensions = { "quickfix" }, -- nvim-tree/fugitive extensions dropped, neither plugin is installed
 		})
