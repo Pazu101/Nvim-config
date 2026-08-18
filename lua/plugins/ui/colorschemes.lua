@@ -67,6 +67,8 @@ return {
 				hl.DiagnosticUnderlineWarn = { sp = c.yellow, undercurl = true }
 				hl.DiagnosticUnderlineInfo = { sp = c.blue, undercurl = true }
 				hl.DiagnosticUnderlineHint = { sp = c.teal, undercurl = true }
+                -- override unused paraneters dim
+                hl.DiagnosticUnnecessary = { fg = c.yellow }
 			end,
 		},
 	},
