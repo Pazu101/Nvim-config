@@ -60,6 +60,7 @@ else
 end
 vim.g.user = "gafamy"
 vim.g.mail = "gaetan.famy@leaner.42.tech"
+-- add if guars to .h files
 vim.api.nvim_create_autocmd("BufNewFile",
     {
         pattern = "*.h",
@@ -76,3 +77,27 @@ vim.api.nvim_create_autocmd("BufNewFile",
             vim.api.nvim_win_set_cursor(0, { 4, 1 })
         end,
     })
+-- add 42 header is in a 42 directory
+local function in_42_tree(filepath)
+    local dir = vim.fn.fnamemodify(filepath, ':p:h')
+    while true do
+        if vim.fn.fnamemodify(dir, ':t'):match('42$') then
+            return true
+        end
+    local parent = vim.fn.fnamemodify(dir, ':h')
+        if parent == dir then break end
+        dir = parent
+    end
+    return false
+end
+
+vim.api.nvim_create_autocmd('BufNewFile',
+    {
+        pattern = { '*.c', '*.h' },
+        callback = function(args)
+            if in_42_tree(args.file) then
+                vim.schedule(function() vim.cmd('Stdheader') end)
+            end
+        end,
+    }
+)
