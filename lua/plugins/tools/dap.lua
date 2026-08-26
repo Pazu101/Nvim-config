@@ -8,11 +8,11 @@ return {
 	-- no rhs on any of these, they're just lazy-load triggers + which-key
 	-- labels, the real bindings are down in config() once dap actually exists
 	keys = {
-		{ "<leader>db", desc = "Toggle breakpoint" },
-		{ "<leader>dc", desc = "Continue" },
-		{ "<leader>di", desc = "Step into" },
-		{ "<leader>do", desc = "Step over" },
-		{ "<leader>du", desc = "Toggle dap-ui" },
+		{ "<leader>Db", desc = "Toggle breakpoint" },
+		{ "<leader>Dc", desc = "Continue" },
+		{ "<leader>Di", desc = "Step into" },
+		{ "<leader>Do", desc = "Step over" },
+		{ "<leader>Du", desc = "Toggle dap-ui" },
 	},
 	config = function()
 		local dap, dapui = require("dap"), require("dapui")
@@ -49,10 +49,10 @@ return {
 		dap.listeners.after.event_initialized["dapui"] = dapui.open
 		dap.listeners.before.event_terminated["dapui"] = dapui.close
 
-		vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "Toggle breakpoint" })
-		vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "Continue" })
-		vim.keymap.set("n", "<leader>di", dap.step_into, { desc = "Step into" })
-		vim.keymap.set("n", "<leader>do", dap.step_over, { desc = "Step over" })
-		vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "Toggle dap-ui" })
+		vim.keymap.set("n", "<leader>Db", dap.toggle_breakpoint, { desc = "Toggle breakpoint" })
+		vim.keymap.set("n", "<leader>Dc", dap.continue, { desc = "Continue" })
+		vim.keymap.set("n", "<leader>Di", dap.step_into, { desc = "Step into" })
+		vim.keymap.set("n", "<leader>Do", dap.step_over, { desc = "Step over" })
+		vim.keymap.set("n", "<leader>Du", dapui.toggle, { desc = "Toggle dap-ui" })
 	end,
 }

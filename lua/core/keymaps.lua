@@ -48,9 +48,8 @@ end, { desc = "Previous diagnostic" })
 vim.keymap.set("n", "]d", function()
 	vim.diagnostic.jump({ count = 1, float = true })
 end, { desc = "Next diagnostic" })
-keymap("n", "<leader>df", vim.lsp.buf.format, opts)
+keymap("n", "<leader>Df", vim.lsp.buf.format, opts)
 keymap("n", "<leader>qf", vim.lsp.buf.code_action, opts)
-
 -- yank/paste to system clipboard without enabling unnamedplus globally
 -- (unnamedplus hijacks every delete too, didn't want that)
 keymap({ "n", "x" }, "<leader>y", [["+y]], { desc = "Yank to system clipboard" })
@@ -60,3 +59,8 @@ keymap("n", "<leader>P", [["+P]], { desc = "Paste before from system clipboard" 
 
 -- c_formatter_42 rewrites the file on disk, :edit! throws away the stale buffer
 keymap("n", "<leader>cf", ":!c_formatter_42 %<CR>:edit!<CR>", opts)
+
+-- format can stay separate since it's unrelated to debugging:
+keymap("n", "<leader>cf", vim.lsp.buf.format, opts)  -- LazyVim's usual "code format" slot
+
+vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
