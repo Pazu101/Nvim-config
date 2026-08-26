@@ -23,7 +23,10 @@ exclude:
   - lua
   - init.lua
   - lazy-lock.json
+<<<<<<< HEAD
   - .claude
+=======
+>>>>>>> upstream/main
   - .github
   - .gitignore
   - .DS_Store
