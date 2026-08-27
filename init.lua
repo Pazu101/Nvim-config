@@ -77,7 +77,7 @@ vim.api.nvim_create_autocmd("BufNewFile",
             vim.api.nvim_win_set_cursor(0, { 4, 1 })
         end,
     })
--- add 42 header is in a 42 directory
+-- if in 42 tree, launch Stdheader and NorminetteToggle on file creation
 local function in_42_tree(filepath)
     local dir = vim.fn.fnamemodify(filepath, ':p:h')
     while true do
@@ -96,7 +96,10 @@ vim.api.nvim_create_autocmd('BufNewFile',
         pattern = { '*.c', '*.h' },
         callback = function(args)
             if in_42_tree(args.file) then
-                vim.schedule(function() vim.cmd('Stdheader') end)
+                vim.schedule(function()
+                    vim.cmd('Stdheader')
+                    vim.cmd('NorminetteToggle')
+                end)
             end
         end,
     }
