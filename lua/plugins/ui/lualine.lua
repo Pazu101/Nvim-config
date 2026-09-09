@@ -171,9 +171,7 @@ return {
 			},
 
             sections = {
-                lualine_a = {},
-                lualine_b = {},
-                lualine_c = {
+                lualine_a = {
                     {
                         "diagnostics",
                         cond = has_diagnostics,
@@ -201,6 +199,9 @@ return {
                         fmt = divider_fmt(""),
                         color = { fg = accents.blame },
                     },
+                },
+                lualine_b = {},
+                lualine_c = {
                     { "branch", color = { fg = accents.branch, gui = "bold" } },
                     { "diff" },
                 },
