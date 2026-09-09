@@ -134,7 +134,7 @@ install_release_binary() {
 	log "Fetching $binary_name from $url"
 	local tmp
 	tmp="$(mktemp -d)"
-	trap 'rm -rf "$tmp"' RETURN
+	trap 'rm -rf "$tmp"; trap - RETURN' RETURN
 	local archive="$tmp/asset"
 	curl -fsSL "$url" -o "$archive"
 	mkdir -p "$LOCAL_BIN"
